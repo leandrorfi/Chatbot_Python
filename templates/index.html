@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chatbot Corretor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #0e1731;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .titulo {
+            font-weight: bold;
+            text-align: center;
+            font-size: 50px;
+            padding-top: .8%;
+            padding-bottom: .8%;
+        }
+
+        #chat-container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        #chat-log {
+            text-align: left;
+        }
+
+        #user-input {
+            width: 70%;
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+        }
+
+        #send-button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #footer {
+            position: absolute;
+            bottom: 0;
+            width: 99%;
+            background-color: #0e1731;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .icone-copiar {
+            cursor: pointer;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo">Chatbot Corretor de Ortografia</div>
+    <div id="chat-container">
+        <div id="chat-log"></div>
+        <input type="text" id="user-input" placeholder="Digite a frase para ser corrigida...">
+        <button id="send-button">Enviar</button>
+    </div>
+
+        <div id="footer">
+            Leandro Ruiz Faria Iqueda<br>
+            Leonardo Garcia de Amaral
+        </div>
+
+        <script>
+            document.getElementById("send-button").addEventListener("click", function() {
+                var mensagemInput = document.getElementById("user-input");
+                var mensagem = mensagemInput.value;
+                document.getElementById("chat-log").innerHTML += "<p><span style='color: #99D9EA'>Usuário: </span>" + mensagem + "</p>";
+        
+                // Limpa o campo de entrada
+                mensagemInput.value = "";
+        
+                // Enviar a mensagem para o servidor Python via AJAX.
+                fetch("/enviar_mensagem", {
+                    method: "POST",
+                    body: new URLSearchParams({ mensagem: mensagem }),
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var resposta = data.content;
+                    document.getElementById("chat-log").innerHTML += "<p><span style='font-weight: bold;text-decoration: underline; color: yellow;'>Sua Correção:</span> " + resposta + "<i title='Copiar' class='fas fa-copy icone-copiar' onclick='copiarResposta(this)'></i></p>";
+                });
+            });
+            function copiarResposta(element) {
+                var respostaTexto = element.previousSibling.textContent; // Obtém o texto da resposta
+                respostaTexto = respostaTexto.trim(); // Remove espaços em branco do início e do final do texto
+                var textarea = document.createElement("textarea");
+                textarea.value = respostaTexto;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textarea);
+                alert("Resposta copiada: " + respostaTexto);
+            }
+        </script>
+        
+</body>
+</html>
